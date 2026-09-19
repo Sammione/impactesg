@@ -10,7 +10,7 @@ import asyncio
 from pypdf import PdfReader
 from docx import Document as DocxDocument
 from typing import List
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.services.rag_service import rag_service
 
 # Enrichment: how many chars of each chunk to send to AI for context generation
