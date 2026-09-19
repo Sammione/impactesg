@@ -19,7 +19,7 @@ from typing import List, Optional, Dict, Tuple, Any
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from langchain_core.documents import Document
 from app.core.config import settings
 
 # ─────────────────────────────────────────────────────────────
