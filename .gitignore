@@ -20,6 +20,14 @@ build/
 .vscode/
 .idea/
 
+# Local DBs & Test Artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.log
+dummy.pdf
+backend/test.txt
+
 # OS
 .DS_Store
 Thumbs.db

@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import { 
   LayoutDashboard, 
   FileEdit, 
-  BrainCircuit, 
+  Sparkles, 
   ShieldCheck, 
   Settings, 
   ChevronLeft, 
   LogOut,
-  Database,
-  BarChart,
+  FileText,
+  BarChart3,
   HelpCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -43,12 +43,12 @@ const Sidebar = ({ mobileOpen, setMobileOpen }: { mobileOpen?: boolean, setMobil
   const pathname = usePathname();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: FileText, label: "Documents & Upload", href: "/dashboard/data" },
+    { icon: BarChart3, label: "Scores & Roadmap", href: "/dashboard/scoring" },
+    { icon: Sparkles, label: "AI Assistant", href: "/dashboard/intelligence" },
     { icon: FileEdit, label: "Report Builder", href: "/dashboard/builder" },
-    { icon: BrainCircuit, label: "Intelligence Panel", href: "/dashboard/intelligence" },
-    { icon: Database, label: "Data Ingestion", href: "/dashboard/data" },
-    { icon: BarChart, label: "ESG Scoring", href: "/dashboard/scoring" },
-    { icon: ShieldCheck, label: "Admin Control", href: "/dashboard/admin" },
+    { icon: ShieldCheck, label: "Organization", href: "/dashboard/admin" },
   ];
 
   const handleNavClick = () => {
@@ -80,7 +80,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }: { mobileOpen?: boolean, setMobil
               <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             {!collapsed && (
-              <span className="font-bold text-lg tracking-tight">SustainIntel</span>
+              <span className="font-bold tracking-tight text-white/70">Grinova</span>
             )}
           </div>
         </div>

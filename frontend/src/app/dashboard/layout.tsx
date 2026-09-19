@@ -18,7 +18,7 @@ export default function DashboardLayout({
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
             <ShieldCheck className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-lg tracking-tight">SustainIntel</span>
+          <span className="font-bold text-lg tracking-tight">Grinova</span>
         </div>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-white/70 hover:text-white">
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

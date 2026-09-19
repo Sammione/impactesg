@@ -46,7 +46,7 @@ export default function SettingsPage() {
         <div className="flex-1 glass p-8 rounded-3xl border border-white/5">
           <div className="mb-8 pb-8 border-b border-white/5">
              <h2 className="text-xl font-bold mb-2">Workspace Preferences</h2>
-             <p className="text-sm text-white/40">Customize how SustainIntel AI operates for your organization.</p>
+             <p className="text-sm text-white/40">Customize how Grinova operates for your organization.</p>
           </div>
 
           <div className="space-y-6">

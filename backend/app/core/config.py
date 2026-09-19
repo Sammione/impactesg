@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-3.5-turbo"           # legacy — kept for compatibility
+    OPENAI_SCORING_MODEL: str = "o3-mini"          # reasoning model for ESG evaluation
+    OPENAI_GENERATION_MODEL: str = "gpt-4o"        # fast model for writing/Q&A
     DATABASE_URL: str = "sqlite:///./sustainability.db"
     
     @property

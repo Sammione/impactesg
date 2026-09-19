@@ -6,12 +6,16 @@ from app.services.framework_engine import framework_engine
 from app.services.document_service import document_service
 import shutil
 import os
+from pathlib import Path
 from datetime import datetime
-from app.db.session import SessionLocal, get_db
+from app.db.session import get_db
 from app.models import analytics, document
 from app.services.scoring_engine import scoring_engine
 
 router = APIRouter()
+
+# Absolute path for uploads — safe regardless of working directory
+UPLOADS_DIR = Path(__file__).resolve().parents[4] / "uploads"
 
 class ChatRequest(BaseModel):
     query: str
@@ -73,61 +77,55 @@ async def upload_document(
     db: Session = Depends(get_db)
 ):
     try:
-        # Create uploads directory if it doesn't exist
-        os.makedirs("uploads", exist_ok=True)
-        file_path = os.path.join("uploads", file.filename)
-        
+        UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+        file_path = str(UPLOADS_DIR / file.filename)
+
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-            
+
         content = await document_service.process_document(file_path, file.filename, framework_id)
-        
-        # Add activity log
+
         org = db.query(analytics.Organization).first()
         if org:
-            new_activity = analytics.ActivityLog(
-                user_name="Admin",
+            db.add(analytics.ActivityLog(
+                user_name="System",
                 action=f"Uploaded document: {file.filename}"
-            )
-            db.add(new_activity)
-            
-            # Add Document record
+            ))
+
             new_doc = document.Document(
                 filename=file.filename,
-                content_type=file.content_type or "application/pdf",
+                content_type=file.content_type or "application/octet-stream",
                 file_path=file_path,
                 framework_id=framework_id,
                 status="processed"
             )
             db.add(new_doc)
-            
-            # Get quantitative metrics
-            db_metrics = db.query(analytics.QuantitativeMetric).filter(analytics.QuantitativeMetric.organization_id == org.id).all()
-            
-            # Generate new score
+
+            db_metrics = db.query(analytics.QuantitativeMetric).filter(
+                analytics.QuantitativeMetric.organization_id == org.id
+            ).all()
+
             new_data = await scoring_engine.calculate_dynamic_score(org.current_score, db_metrics)
-            
-            # Update org
+
             org.current_score = new_data["overall_score"]
             org.current_status = new_data["status"]
             org.risk_level = new_data["risk_level"]
-            
-            # Create new history entry
+
+            breakdown = new_data["breakdown"]
             new_history = analytics.ScoreHistory(
                 organization_id=org.id,
                 period_name=f"Ingestion {datetime.now().strftime('%m/%d %H:%M')}",
                 overall_score=new_data["overall_score"],
-                env_score=new_data["breakdown"]["Environmental"],
-                soc_score=new_data["breakdown"]["Social"],
-                gov_score=new_data["breakdown"]["Governance"],
-                supply_chain_score=new_data["breakdown"].get("Supply_Chain", 65),
-                carbon_score=new_data["breakdown"].get("Carbon", 80),
-                diversity_score=new_data["breakdown"].get("Diversity", 88),
+                env_score=breakdown.get("Environmental"),
+                soc_score=breakdown.get("Social"),
+                gov_score=breakdown.get("Governance"),
+                supply_chain_score=breakdown.get("Supply_Chain"),
+                carbon_score=breakdown.get("Carbon"),
+                diversity_score=breakdown.get("Diversity"),
                 forecast_score=new_data["forecast_score"]
             )
             db.add(new_history)
-            
-            # Save Action Plans
+
             for plan in new_data.get("action_plans", []):
                 db.add(analytics.ActionPlan(
                     organization_id=org.id,
@@ -136,8 +134,7 @@ async def upload_document(
                     impact=plan.get("impact", 5),
                     effort=plan.get("effort", 5)
                 ))
-                
-            # Save Greenwashing Insight if detected
+
             gw = new_data.get("greenwashing", {})
             if gw.get("detected"):
                 db.add(analytics.Insight(
@@ -145,9 +142,9 @@ async def upload_document(
                     title="AI Greenwashing Alert",
                     description=gw.get("reason", "Inconsistencies detected in uploaded documents.")
                 ))
-            
+
             db.commit()
-        
+
         return {
             "filename": file.filename,
             "status": "success",
@@ -179,13 +176,55 @@ async def delete_document(doc_id: int, db: Session = Depends(get_db)):
         doc = db.query(document.Document).filter(document.Document.id == doc_id).first()
         if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Remove file from disk
+
+        doc_name = doc.filename
         if os.path.exists(doc.file_path):
-            os.remove(doc.file_path)
-            
+            try:
+                os.remove(doc.file_path)
+            except Exception:
+                pass
+
         db.delete(doc)
         db.commit()
-        return {"status": "success"}
+
+        # Check remaining documents count
+        remaining = db.query(document.Document).count()
+        org = db.query(analytics.Organization).first()
+
+        if remaining == 0 and org:
+            # Complete reset to zero state: no documents left
+            org.current_score = 0.0
+            org.current_status = "Awaiting Documents"
+            org.risk_level = "Unassessed"
+            db.query(analytics.ScoreHistory).filter(analytics.ScoreHistory.organization_id == org.id).delete()
+            db.query(analytics.ActionPlan).filter(analytics.ActionPlan.organization_id == org.id).delete()
+            db.query(analytics.Insight).delete()
+            db.add(analytics.ActivityLog(
+                user_name="System",
+                action=f"Deleted document '{doc_name}'. System reset to clean state."
+            ))
+            db.commit()
+
+            try:
+                from app.services.rag_service import rag_service
+                rag_service.reset_all()
+            except Exception as e:
+                print(f"[RAG] Reset error on document delete: {e}")
+
+        elif remaining > 0 and org:
+            # Recalculate score based on remaining files
+            try:
+                db_metrics = db.query(analytics.QuantitativeMetric).filter(
+                    analytics.QuantitativeMetric.organization_id == org.id
+                ).all()
+                new_data = await scoring_engine.calculate_dynamic_score(org.current_score, db_metrics)
+                org.current_score = new_data["overall_score"]
+                org.current_status = new_data["status"]
+                org.risk_level = new_data["risk_level"]
+                db.commit()
+            except Exception as e:
+                print(f"[Scoring] Recalculation after delete failed: {e}")
+
+        return {"status": "success", "remaining_documents": remaining}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -81,6 +81,11 @@ export const analyticsApi = {
   triggerScore: async () => {
     const res = await api.post('/api/v1/analytics/trigger-score');
     return res.data;
+  },
+
+  reset: async () => {
+    const res = await api.post('/api/v1/analytics/reset');
+    return res.data;
   }
 };
 

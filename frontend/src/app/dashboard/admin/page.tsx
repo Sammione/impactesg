@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { 
-  Users, 
-  ShieldAlert, 
-  Key, 
-  Activity, 
+import {
+  Users,
+  ShieldAlert,
+  Key,
+  Activity,
   Settings,
   ChevronRight,
   UserPlus,
@@ -14,66 +14,48 @@ import {
 
 const AdminPanel = () => {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin System Control</h1>
-          <p className="text-white/40 mt-1 text-sm font-medium">Platform-wide governance and security management.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Organization & Security</h1>
+          <p className="text-white/50 mt-1 text-sm font-medium">Team members, compliance governance, and audit trails.</p>
         </div>
-        <button className="px-5 py-2.5 rounded-xl bg-blue-600 text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20">
+        <button className="px-5 py-2.5 rounded-xl bg-blue-600 text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 opacity-50 cursor-not-allowed" disabled>
           <UserPlus className="w-4 h-4" />
-          Invite Stakeholder
+          Invite Team Member
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: "Total Users", value: "1,204", icon: Users, color: "blue" },
-          { label: "Active Roles", value: "8", icon: Lock, color: "purple" },
-          { label: "API Health", value: "99.9%", icon: Activity, color: "emerald" },
-        ].map((stat, i) => (
-          <div key={i} className="glass p-6 rounded-3xl border border-white/5">
-             <div className="flex items-center gap-3 mb-4">
-               <div className={`p-2 rounded-lg bg-${stat.color}-500/10 border border-${stat.color}-500/20`}>
-                 <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
-               </div>
-               <span className="text-xs font-bold text-white/30 uppercase tracking-widest">{stat.label}</span>
-             </div>
-             <div className="text-3xl font-bold">{stat.value}</div>
-          </div>
-        ))}
+      {/* Coming soon notice */}
+      <div className="glass rounded-3xl p-8 border border-white/5 bg-gradient-to-br from-blue-600/5 to-transparent text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto">
+          <ShieldAlert className="w-7 h-7 text-blue-400" />
+        </div>
+        <h2 className="text-xl font-bold">Admin Dashboard</h2>
+        <p className="text-white/40 text-sm max-w-md mx-auto leading-relaxed">
+          User management, role-based access control, and system audit logs will be available here once authentication is configured.
+        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white/40 uppercase tracking-widest">
+          <Activity className="w-3.5 h-3.5" />
+          Coming soon
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Role-Based Access Control placeholder */}
         <div className="glass rounded-3xl border border-white/5 overflow-hidden">
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h3 className="font-bold flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-amber-500" />
               Role-Based Access Control
             </h3>
-            <button className="text-[10px] font-bold text-blue-400 uppercase tracking-widest hover:text-blue-300">New Role</button>
           </div>
-          <div className="divide-y divide-white/5">
-             {[
-               { role: "Super Admin", access: "Full System Access", users: 2 },
-               { role: "ESG Analyst", access: "Report & AI Tools Only", users: 15 },
-               { role: "Stakeholder", access: "Read-Only Dashboard", users: 43 },
-               { role: "Data Manager", access: "Ingestion & Frameworks", users: 5 }
-             ].map((role, i) => (
-               <div key={i} className="p-6 flex items-center justify-between hover:bg-white/[0.01] transition-colors cursor-pointer group">
-                  <div>
-                    <div className="text-sm font-bold mb-1">{role.role}</div>
-                    <div className="text-xs text-white/30">{role.access}</div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                     <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{role.users} Users</div>
-                     <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-white transition-colors" />
-                  </div>
-               </div>
-             ))}
+          <div className="p-8 text-center text-white/30 text-sm italic">
+            No roles configured yet. Add authentication to enable RBAC.
           </div>
         </div>
 
+        {/* System logging placeholder */}
         <div className="glass rounded-3xl border border-white/5 overflow-hidden">
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h3 className="font-bold flex items-center gap-2">
@@ -82,37 +64,8 @@ const AdminPanel = () => {
             </h3>
             <Settings className="w-4 h-4 text-white/10" />
           </div>
-          <div className="p-6 space-y-6">
-             <div className="space-y-4">
-                {[
-                  { event: "Login Attempt", user: "m.ross@corp.com", status: "Success", time: "2m ago" },
-                  { event: "Data Export", user: "sarah.v@corp.com", status: "Pending Approval", time: "15m ago" },
-                  { event: "API Secret Rotated", user: "System", status: "Automated", time: "1h ago" },
-                  { event: "Role Modified", user: "Admin", status: "Audited", time: "4h ago" }
-                ].map((log, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <div className="flex gap-4 items-center">
-                       <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'Success' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
-                       <div>
-                          <div className="font-bold text-white/70">{log.event}</div>
-                          <div className="text-[10px] text-white/30">{log.user}</div>
-                       </div>
-                    </div>
-                    <div className="text-right">
-                       <div className="font-bold text-white/40">{log.status}</div>
-                       <div className="text-[10px] text-white/20">{log.time}</div>
-                    </div>
-                  </div>
-                ))}
-             </div>
-             
-             <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Audit Compliance</div>
-                <div className="flex items-center justify-between">
-                   <div className="text-sm font-medium">SOC2 Type II Audit Log</div>
-                   <button className="px-3 py-1 rounded-lg bg-blue-600/20 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest">Generate PDF</button>
-                </div>
-             </div>
+          <div className="p-8 text-center text-white/30 text-sm italic">
+            Audit logs will appear here once authentication is enabled.
           </div>
         </div>
       </div>
